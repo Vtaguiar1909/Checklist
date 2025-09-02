@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{%block content%}
+<h1>You're in the Home page!</h1>
+{% comment %} <nav class="fixed top-0 left-0 bg-[#242526] w-30 h-full">
+
+</nav> {% endcomment %}
+{%if user.is_authenticated%}
+    <h2>You're authenticated</h2>
+{%else%}
+    <h2>You're not authenticated</h2>
+    <div>
+        <form method="POST" action="">
+
+        </form>
+    </div>
+{%endif%}
+{%endblock%}
