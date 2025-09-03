@@ -1,0 +1,10 @@
+{%extends "base.html"%}
+
+{%block content%}
+    <form method="POST" action="">
+        {%csrf_token%}
+        {{form.as_p}}
+        <button type="submit" class="bg-red-500 hover:bg-red-700">Login</button>
+    </form>
+
+{%endblock%}

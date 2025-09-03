@@ -1,17 +1,36 @@
-{% extends "base.html" %}
+{% extends "base.html" %} 
 {%block content%}
 <h1>You're in the Home page!</h1>
-{% comment %} <nav class="fixed top-0 left-0 bg-[#242526] w-30 h-full">
-
-</nav> {% endcomment %}
 {%if user.is_authenticated%}
-    <h2>You're authenticated</h2>
+  {%if messages%}
+    {%for message in messages%}
+      {{message}}
+    {%endfor%}
+  {%endif%}
 {%else%}
-    <h2>You're not authenticated</h2>
-    <div>
-        <form method="POST" action="">
-
-        </form>
-    </div>
+<section class="flex h-100 w-100">
+    <table class="border-collapse border border-gray-400 ...">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 ...">State</th>
+          <th class="border border-gray-300 ...">City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="border border-gray-300 ...">Indiana</td>
+          <td class="border border-gray-300 ...">Indianapolis</td>
+        </tr>
+        <tr>
+          <td class="border border-gray-300 ...">Ohio</td>
+          <td class="border border-gray-300 ...">Columbus</td>
+        </tr>
+        <tr>
+          <td class="border border-gray-300 ...">Michigan</td>
+          <td class="border border-gray-300 ...">Detroit</td>
+        </tr>
+      </tbody>
+    </table>
+</section>
 {%endif%}
 {%endblock%}
