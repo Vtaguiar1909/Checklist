@@ -42,3 +42,7 @@ def login_user(request):
         messages.success(request,"You must be registered to continue!")
         form = LoginForm()    
     return render(request,'login.html',{'form':form})
+
+def logout_user(request):
+    logout(request)
+    return redirect('home')
