@@ -2,12 +2,12 @@ from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from .forms import SignUpForm,LoginForm
-from django import forms 
 from .models import User
 # Create your views here.
 
 def home(request):
-    return render(request,'home.html',{})
+    users = User.objects.all() 
+    return render(request,'home.html',{'users':users})
 
 def register(request):
     if request.method == "POST":

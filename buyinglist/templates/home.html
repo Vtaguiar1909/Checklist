@@ -2,7 +2,7 @@
 {%block content%}
 <h1>You're in the Home page!</h1>
 {%if user.is_authenticated%}
-  <button href="{%url 'logout'%}">Logout</button>
+    <button href="{%url 'logout'%}" class="bg-red-400">Logout</button>
   {%if messages%}
     {%for message in messages%}
       {{message}}
