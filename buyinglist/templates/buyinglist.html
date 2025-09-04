@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block  content%}
+<h1>Add item list !</h1>
+    <form method="POST" action="{% url 'add_item' %}">
+        {% csrf_token %}
+        {{form.as_p}}
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700">Submit</button>
+    </form>
+{% endblock  %}

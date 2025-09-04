@@ -1,13 +1,13 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
-from .forms import SignUpForm,LoginForm
-from .models import User
+from .forms import SignUpForm,LoginForm, ItemForm
+from .models import Item
 # Create your views here.
 
 def home(request):
-    users = User.objects.all() 
-    return render(request,'home.html',{'users':users})
+    items = Item.objects.all()
+    return render(request,'home.html',{'items':items})
 
 def register(request):
     if request.method == "POST":
@@ -33,16 +33,60 @@ def login_user(request):
             user = authenticate(username=username,password=password)
         
             if user is not None:
-                login(user)
-                messages.success(request,"You've logged in !")
+                login(request,user)
                 return redirect('home')
             else:
-                form.add_error(None,"Invalid username or password")
+                messages.success(request,"You must be registered to continue!")
+                form = LoginForm()
+                return redirect('register')
     else:
-        messages.success(request,"You must be registered to continue!")
-        form = LoginForm()    
-    return render(request,'login.html',{'form':form})
+        form = LoginForm()
+        return render(request,'login.html',{'form':form})    
 
 def logout_user(request):
-    logout(request)
-    return redirect('home')
+    if request.user.is_authenticated:
+        logout(request)
+        messages.success(request,"You have been logged out ...")
+        return redirect('home')
+    else:
+        messages.success(request,"You've not logged in !")
+        return redirect('home')
+
+def add_item(request):
+    form = ItemForm(request.POST or None)
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            if form.is_valid():
+                form.save()
+                messages.success(request,"Succeded in adding the item !")
+                return redirect('home')
+        return render(request,'buyinglist.html',{'form':form})
+    elif (not request.user.is_authenticated):
+        messages.success("You must be logged in to succeed")
+        return redirect('login')
+    else:
+        return redirect('home')
+    
+def update_item(request,pk):
+    if request.user.is_authenticated:
+        current_item = Item.objects.get(id=pk)
+        form = ItemForm(request.POST or None,instance=current_item)
+        print(pk,current_item)
+        if form.is_valid():
+            form.save()
+            messages.success(request,"Updated !")
+            return redirect('home')
+        return render(request,'update_item.html',{"form":form})
+    else:
+        messages.success(request,"Must be logged in!")
+        return redirect("home")
+
+def delete_item(request,pk):
+    if request.user.is_authenticated:
+        current_item = Item.objects.get(id=pk)
+        current_item.delete()
+        messages.success(request,"Deleted !")
+        return redirect('home')
+    else:
+        messages.success(request,"You must be logged in !")
+        return redirect('login')

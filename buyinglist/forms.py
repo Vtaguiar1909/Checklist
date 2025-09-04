@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
+from .models import Item
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(label="email", widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Email'}),required=True)
@@ -36,3 +37,12 @@ class LoginForm(forms.Form):
     class Meta:
         model = User
         fields = ('username','password')
+
+class ItemForm(forms.ModelForm):
+    name = forms.CharField(max_length=50,widget=forms.TextInput(attrs={'class':'form-control','placeholder':'username'}))
+    quantity = forms.IntegerField(min_value=1,max_value=20,required=True)
+    type_product = forms.CharField(max_length=50,widget=forms.TextInput(attrs={'class':'form-control','placeholder':'username'}))
+    
+    class Meta:
+        model = Item
+        fields = ('name','quantity','type_product')

@@ -1,37 +1,39 @@
 {% extends "base.html" %} 
 {%block content%}
-<h1>You're in the Home page!</h1>
-{%if user.is_authenticated%}
-    <button href="{%url 'logout'%}" class="bg-red-400">Logout</button>
+{%if user.is_authenticated %}
+  <h2> Hi {{user.username}} you're logged in!</h2>
   {%if messages%}
     {%for message in messages%}
       {{message}}
     {%endfor%}
   {%endif%}
-{%else%}
-<section class="flex h-100 w-100">
-    <table class="border-collapse border border-gray-400 ...">
-      <thead>
+  <thead>
+    <tr>
+      <th scope = "col" class="border border-gray-300"> Name</th>
+      <th scope = "col" class="border border-gray-300"> Quantity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if items %}  
+      {%for item in items%}<table class="border-collapse border border-gray-400 ...">
         <tr>
-          <th class="border border-gray-300 ...">State</th>
-          <th class="border border-gray-300 ...">City</th>
+          <td class="border border-gray-300 ..."><a href=""> {{item.id}}   </a></td>
+          <td class="border border-gray-300 ..."><a href=""> {{item.name}} </a></td>
+          <td class="border border-gray-300 ...">{{item.quantity}}</td>
         </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="border border-gray-300 ...">Indiana</td>
-          <td class="border border-gray-300 ...">Indianapolis</td>
-        </tr>
-        <tr>
-          <td class="border border-gray-300 ...">Ohio</td>
-          <td class="border border-gray-300 ...">Columbus</td>
-        </tr>
-        <tr>
-          <td class="border border-gray-300 ...">Michigan</td>
-          <td class="border border-gray-300 ...">Detroit</td>
-        </tr>
+      {% endfor %}
+    {% endif %}
       </tbody>
     </table>
-</section>
+    <button class='bg-green-700' href="{% url 'add_item' %}">
+      Add
+    </button>
+{%else%}
+    <h1>You've got to be logged in!</h1>
+    {%if messages%}
+    {%for message in messages%}
+      {{message}}
+    {%endfor%}
+  {%endif%}
 {%endif%}
 {%endblock%}
