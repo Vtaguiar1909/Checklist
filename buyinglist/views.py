@@ -6,9 +6,15 @@ from .models import Item
 # Create your views here.
 
 def home(request):
-    items = Item.objects.all()
-    return render(request,'home.html',{'items':items})
-
+    if request.method =="GET":
+        pk = request.user.id
+        items = Item.objects.filter(owner=pk)
+        if request.user.is_authenticated:
+            if items is not None:
+                return render(request,'home.html',{'items':items})
+        else:
+            return render(request,'home.html',{'items':items})
+    
 def register(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
@@ -18,6 +24,7 @@ def register(request):
             password = form.cleaned_data['password1']
             user = authenticate(username=username,password=password)
             login(request,user)
+            request.session.set_expiry(300)
             messages.success(request,"You have successfull logged in!")
             return redirect('home')
     else:
@@ -34,6 +41,7 @@ def login_user(request):
         
             if user is not None:
                 login(request,user)
+                request.session.set_expiry(300)
                 return redirect('home')
             else:
                 messages.success(request,"You must be registered to continue!")
@@ -49,7 +57,7 @@ def logout_user(request):
         messages.success(request,"You have been logged out ...")
         return redirect('home')
     else:
-        messages.success(request,"You've not logged in !")
+        messages.success(request,"You're not logged in !")
         return redirect('home')
 
 def add_item(request):
@@ -57,7 +65,9 @@ def add_item(request):
     if request.user.is_authenticated:
         if request.method == "POST":
             if form.is_valid():
-                form.save()
+                item = form.save(commit=False)
+                item.owner = request.user
+                item.save() 
                 messages.success(request,"Succeded in adding the item !")
                 return redirect('home')
         return render(request,'buyinglist.html',{'form':form})
