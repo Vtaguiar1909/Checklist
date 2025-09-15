@@ -1,13 +1,15 @@
 {% extends "base.html" %} 
 {%block content%}
+<h1>Hello {{user}}</h1>
 {%if messages%}
   {%for message in messages%}
-    {{message}}
+    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 transition duration-1000 ease-in-out" role="alert">
+      <span class="font-medium">{{message}}</span>
+    </div>  
   {%endfor%}
 {%endif%}
 <main class="flex flex-col items-center justify-center h-screen">
 {%if user.is_authenticated %}
-  <h2> Hi {{user.username}} you're logged in!</h2>
   <table class="table-auto w-40">
     <thead>
       <tr class="h-8">

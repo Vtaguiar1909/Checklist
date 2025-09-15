@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {%block content%}
-
+{%if messages%}
+    {%for message in messages%}
+        {{message}}
+    {% endfor %}
+{%endif%}
 <div class="w-100 h-100">
     <form method="POST" action="">
         {% csrf_token %}

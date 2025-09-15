@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from .forms import SignUpForm,LoginForm, ItemForm
 from .models import Item
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 def home(request):
@@ -18,6 +19,7 @@ def home(request):
 def register(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
+        #checa se usuario existe e o forms está de acordo
         if form.is_valid():
             form.save()
             username = form.cleaned_data['username']
@@ -27,6 +29,10 @@ def register(request):
             request.session.set_expiry(300)
             messages.success(request,"You have successfull logged in!")
             return redirect('home')
+        else:
+            print('here')
+            messages.success(request,"Username has already been used")
+            return redirect('register')
     else:
         form = SignUpForm()
         return render(request,'register.html',{'form':form})
@@ -59,7 +65,8 @@ def logout_user(request):
     else:
         messages.success(request,"You're not logged in !")
         return redirect('home')
-
+    
+@login_required(login_url="/login/")
 def add_item(request):
     form = ItemForm(request.POST or None)
     if request.user.is_authenticated:
@@ -76,27 +83,22 @@ def add_item(request):
         return redirect('login')
     else:
         return redirect('home')
-    
-def update_item(request,pk):
-    if request.user.is_authenticated:
-        current_item = Item.objects.get(id=pk)
-        form = ItemForm(request.POST or None,instance=current_item)
-        print(pk,current_item)
-        if form.is_valid():
-            form.save()
-            messages.success(request,"Updated !")
-            return redirect('home')
-        return render(request,'update_item.html',{"form":form})
-    else:
-        messages.success(request,"Must be logged in!")
-        return redirect("home")
 
-def delete_item(request,pk):
-    if request.user.is_authenticated:
-        current_item = Item.objects.get(id=pk)
-        current_item.delete()
-        messages.success(request,"Deleted !")
+@login_required(login_url="/login/")
+def update_item(request,pk):
+    current_item = Item.objects.get(id=pk)
+    form = ItemForm(request.POST or None,instance=current_item)
+    print(pk,current_item)
+    if form.is_valid():
+        form.save()
+        messages.success(request,"Updated !")
         return redirect('home')
-    else:
-        messages.success(request,"You must be logged in !")
-        return redirect('login')
+    return render(request,'update_item.html',{"form":form})
+
+@login_required(login_url="/login/")
+def delete_item(request,pk):
+    current_item = Item.objects.get(id=pk)
+    current_item.delete()
+    messages.success(request,"Deleted !")
+    return redirect('home')
+    
