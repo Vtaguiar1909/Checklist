@@ -3,23 +3,36 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from .forms import SignUpForm,LoginForm, ItemForm
 from .models import Item
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 def home(request):
-    items = Item.objects.all()
-    return render(request,'home.html',{'items':items})
-
+    if request.method =="GET":
+        pk = request.user.id
+        items = Item.objects.filter(owner=pk)
+        if request.user.is_authenticated:
+            if items is not None:
+                return render(request,'home.html',{'items':items})
+        else:
+            return render(request,'home.html',{'items':items})
+    
 def register(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
+        #checa se usuario existe e o forms está de acordo
         if form.is_valid():
             form.save()
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
             user = authenticate(username=username,password=password)
             login(request,user)
+            request.session.set_expiry(300)
             messages.success(request,"You have successfull logged in!")
             return redirect('home')
+        else:
+            print('here')
+            messages.success(request,"Username has already been used")
+            return redirect('register')
     else:
         form = SignUpForm()
         return render(request,'register.html',{'form':form})
@@ -34,6 +47,7 @@ def login_user(request):
         
             if user is not None:
                 login(request,user)
+                request.session.set_expiry(300)
                 return redirect('home')
             else:
                 messages.success(request,"You must be registered to continue!")
@@ -49,15 +63,18 @@ def logout_user(request):
         messages.success(request,"You have been logged out ...")
         return redirect('home')
     else:
-        messages.success(request,"You've not logged in !")
+        messages.success(request,"You're not logged in !")
         return redirect('home')
-
+    
+@login_required(login_url="/login/")
 def add_item(request):
     form = ItemForm(request.POST or None)
     if request.user.is_authenticated:
         if request.method == "POST":
             if form.is_valid():
-                form.save()
+                item = form.save(commit=False)
+                item.owner = request.user
+                item.save() 
                 messages.success(request,"Succeded in adding the item !")
                 return redirect('home')
         return render(request,'buyinglist.html',{'form':form})
@@ -66,27 +83,22 @@ def add_item(request):
         return redirect('login')
     else:
         return redirect('home')
-    
-def update_item(request,pk):
-    if request.user.is_authenticated:
-        current_item = Item.objects.get(id=pk)
-        form = ItemForm(request.POST or None,instance=current_item)
-        print(pk,current_item)
-        if form.is_valid():
-            form.save()
-            messages.success(request,"Updated !")
-            return redirect('home')
-        return render(request,'update_item.html',{"form":form})
-    else:
-        messages.success(request,"Must be logged in!")
-        return redirect("home")
 
-def delete_item(request,pk):
-    if request.user.is_authenticated:
-        current_item = Item.objects.get(id=pk)
-        current_item.delete()
-        messages.success(request,"Deleted !")
+@login_required(login_url="/login/")
+def update_item(request,pk):
+    current_item = Item.objects.get(id=pk)
+    form = ItemForm(request.POST or None,instance=current_item)
+    print(pk,current_item)
+    if form.is_valid():
+        form.save()
+        messages.success(request,"Updated !")
         return redirect('home')
-    else:
-        messages.success(request,"You must be logged in !")
-        return redirect('login')
+    return render(request,'update_item.html',{"form":form})
+
+@login_required(login_url="/login/")
+def delete_item(request,pk):
+    current_item = Item.objects.get(id=pk)
+    current_item.delete()
+    messages.success(request,"Deleted !")
+    return redirect('home')
+    
